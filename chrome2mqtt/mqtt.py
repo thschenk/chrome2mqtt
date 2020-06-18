@@ -2,6 +2,7 @@
 import logging
 from time import sleep
 import paho.mqtt.client as mqtt
+import ssl
 
 class MQTT(mqtt.Client):
     ''' Mqtt handler, takes care of adding a root topic to all topics
@@ -12,7 +13,7 @@ class MQTT(mqtt.Client):
     is_connected = False
     root = ''
 
-    def __init__(self, host='127.0.0.1', port=1883, client='chrome', root='', user=None, password=None): #pylint: disable=too-many-arguments, line-too-long
+    def __init__(self, host='127.0.0.1', port=1883, client='chrome', root='', user=None, password=None, cafile=None): #pylint: disable=too-many-arguments, line-too-long
         super().__init__(host, port)
         self.subscriptions = []
         self.host = host
@@ -27,6 +28,10 @@ class MQTT(mqtt.Client):
         self._client_id = client
         if user is not None:
             self.username_pw_set(user, password)
+
+        if cafile is not None:
+            self.tls_set(ca_certs=cafile)
+
         self.__connect()
 
     def subscribe(self, topic, qos=0):

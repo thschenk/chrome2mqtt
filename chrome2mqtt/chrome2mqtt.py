@@ -43,6 +43,10 @@ def parse_args(argv=None):
     parser.add_argument('-C', '--cleanup', action="store_true", dest="cleanup", help="Cleanup mqtt topic on exit")
     parser.add_argument('-S', '--standalone', action="store_true", dest="split", help="Split into separate devices")
     parser.add_argument('--alias', action="store", help="topic aliases for devices")
+    parser.add_argument('--ip', action="store", help="Don't do discovery, just add this device")
+    parser.add_argument('--cafile', action="store", help="Set MQTT cafile")
+
+
     return parser.parse_args(argv)
 
 def start_banner(args):
@@ -89,7 +93,8 @@ def main_loop():
             client=args.mqttclient,
             root=args.mqttroot,
             user=args.mqttuser,
-            password=args.mqttpass
+            password=args.mqttpass,
+            cafile=args.cafile
             )
     except ConnectionError as exception:
         print('Error connecting to mqtt host {0} on port {1}'.format(args.mqtthost, args.mqttport))
@@ -111,6 +116,13 @@ def main_loop():
         sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
+
+    if args.ip:
+        for ip in args.ip.split(','):
+            print('Adding IP',ip.strip())
+            coordinator.add_device_by_ip(ip.strip())
+
     while True:
-        coordinator.discover(args.MAX)
+        if not args.ip:
+            coordinator.discover(args.MAX)
         signal.pause()

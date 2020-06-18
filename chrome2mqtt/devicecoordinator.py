@@ -40,6 +40,9 @@ class DeviceCoordinator:
             sleep(0.5)
         stop_discovery()
 
+    def add_device_by_ip(self, ipaddress):
+        self.__search_callback(pychromecast.Chromecast(ipaddress))
+
     def cleanup(self):
         ''' Clean up MQTT topics for all registered rooms '''
         for room in self.rooms:
